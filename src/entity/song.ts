@@ -30,7 +30,7 @@ export class Song {
     comment: '创建时间',
     name: 'create_at',
   })
-  creatAt: Date
+  createAt: Date
 
   @UpdateDateColumn({
     type: 'datetime',

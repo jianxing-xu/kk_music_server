@@ -37,9 +37,13 @@ export class UserService {
 
   // 增加听歌总数
   async addListenCount(user: User) {
-    const exist = await this.findOne(user);
-    exist.listenCount++;
-    await this.userRepostory.save(exist);
+    try {
+      const exist = await this.findOne({ id: user.id });
+      exist.listenCount++;
+      await this.userRepostory.save(exist);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   // 更新用户信息
@@ -48,7 +52,6 @@ export class UserService {
       const exist = await this.findOne({ id });
       const newUser = this.userRepostory.merge(exist, user);
       await this.userRepostory.save(newUser);
-      console.log(newUser);
       return newUser;
     } catch (error) {
       throw new HttpException("更新出错", HttpStatus.BAD_REQUEST);
@@ -80,22 +83,43 @@ export class UserService {
     await this.userRepostory.save(exist);
   }
 
+
+  async favoriteMulSong(ids: string, userId: number) {
+    try {
+      const exist = await this.findOne({ id: userId });
+      const existIdsArr = exist?.favorites?.split(",") || [];
+      let idsArr = ids.split(",");
+      const newIds = [...new Set([...existIdsArr, ...idsArr])].join(",");
+      exist.favorites = newIds;
+      await this.userRepostory.save(exist);
+    } catch (error) {
+      throw new HttpException("切换失败", HttpStatus.BAD_REQUEST);
+    }
+  }
+
   /**
    * 我的收藏: 已收藏则取消，未收藏则收藏
    * @param song 歌曲
    * @param userId 用户id
    */
   async toggleFavorite(musicId: string, userId: number) {
-    const exist = await this.findOne({ id: userId });
-    const arr = exist.favorites.split(",");
-    const idx = arr.indexOf(musicId);
-    if (~idx) {
-      arr.splice(idx, 1);
-    } else {
-      arr.push(musicId);
+    try {
+      let flag = false;
+      const exist = await this.findOne({ id: userId });
+      const arr = exist.favorites.split(",");
+      const idx = arr.indexOf(musicId);
+      if (~idx) {
+        arr.splice(idx, 1);
+      } else {
+        flag = true;
+        arr.push(musicId);
+      }
+      exist.favorites = arr.join(",");
+      await this.userRepostory.save(exist);
+      return flag;
+    } catch (error) {
+      throw new HttpException("切换失败", HttpStatus.BAD_REQUEST);
     }
-    exist.favorites = arr.join(",");
-    await this.userRepostory.save(exist);
   }
 
 

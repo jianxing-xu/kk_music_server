@@ -16,8 +16,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   getRequest(context: ExecutionContext) {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest();
-    console.log(request.headers);
-    
     return request;
   }
   // 只要实现了,这个方法,jwt校验失败就不会自动抛出异常，需要手动根据用户信息抛出异常

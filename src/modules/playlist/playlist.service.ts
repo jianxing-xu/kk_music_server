@@ -28,8 +28,8 @@ export class PlaylistService {
   }
 
   // 创建一个歌单
-  async createOne(userId: number, cerateDto: CreateOneDTO) {
-    const exist = await this.findOne({ name: cerateDto.name });
+  async createOne(userId: number, name: string) {
+    const exist = await this.findOne({ name });
     if (!!exist) {
       throw new HttpException("歌单已存在", HttpStatus.BAD_REQUEST);
     }
@@ -37,7 +37,7 @@ export class PlaylistService {
       const playlist = this.playlistRepository.create();
       const auther = await this.userService.findOne({ id: userId });
       delete auther.password;
-      Object.assign(playlist, { ...cerateDto, auther });
+      Object.assign(playlist, { name, auther });
       return this.playlistRepository.save(playlist);
     } catch (error) {
       console.log(error);
@@ -60,6 +60,7 @@ export class PlaylistService {
    * @param playlistId 歌单id
    */
   async addSongToPlayList(musicIds: string, playlistId: number) {
+
     try {
       const existPlaylist = await this.playlistRepository.findOne(playlistId, { relations: ['musicList'] });
       if (!!!existPlaylist) throw "歌单不存在";
@@ -67,8 +68,8 @@ export class PlaylistService {
       const newSongs = [...existPlaylist.musicList, ...insertSongs];
 
       existPlaylist.musicList = unique(newSongs, 'id');
-
-      this.playlistRepository.save(existPlaylist);
+      existPlaylist.totalCount = newSongs.length;
+      await this.playlistRepository.save(existPlaylist);
     } catch (error) {
       console.log(error);
       throw new HttpException("系统错误" + error, HttpStatus.BAD_REQUEST);
@@ -92,7 +93,18 @@ export class PlaylistService {
   }
 
 
+  async findById(id: string) {
+    return this.playlistRepository.findOne({ where: { id }, relations: ['musicList'] })
+  }
 
-
+  // 删除多个歌单
+  async removeMulPlaylist(ids: string) {
+    try {
+      await this.playlistRepository.createQueryBuilder().delete().from(PlayList).whereInIds(ids).printSql().execute();
+    } catch (error) {
+      console.log(error);
+      throw new HttpException("系统错误", HttpStatus.BAD_REQUEST);
+    }
+  }
 
 }

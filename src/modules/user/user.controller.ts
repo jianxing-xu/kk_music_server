@@ -44,7 +44,6 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async findUserInfo(@GetUser() user) {
     const data = await this.userService.findOne({ id: user.id });
-    console.log(data);
     return data;
   }
 
@@ -91,8 +90,16 @@ export class UserController {
   @Get('toggleFavorite/:musicId')
   @HttpCode(HttpStatus.OK)
   async toggleFavorite(@Param('musicId') musicId: string, @GetUser() user: User) {
-    await this.userService.toggleFavorite(musicId, user.id);
-    return "Toggle Success !";
+    const flag = await this.userService.toggleFavorite(musicId, user.id);
+    return flag;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('favoriteMulSong/:ids')
+  @HttpCode(HttpStatus.OK)
+  async favoriteMulSong(@Param('ids') ids: string, @GetUser() user: User) {
+    const flag = await this.userService.favoriteMulSong(ids, user.id);
+    return flag;
   }
 
 }

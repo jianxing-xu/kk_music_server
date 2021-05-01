@@ -14,10 +14,10 @@ export class PlaylistController {
 
   // 创建歌单
   @UseGuards(JwtAuthGuard)
-  @Post('create')
+  @Post('create/:name')
   @HttpCode(HttpStatus.OK)
-  async create(@GetUser() user: User, @Body() data: CreateOneDTO) {
-    return this.playlistService.createOne(user.id, data);
+  async create(@GetUser() user: User, @Param("name") name: string) {
+    return this.playlistService.createOne(user.id, name);
   }
 
   // 删除歌单
@@ -26,6 +26,15 @@ export class PlaylistController {
   @HttpCode(HttpStatus.OK)
   async remove(@GetUser() user: User, @Param("id") id: number) {
     return this.playlistService.removeOne(id);
+  }
+
+  // 删除歌单
+  @UseGuards(JwtAuthGuard)
+  @Post('removeMul/:ids')
+  @HttpCode(HttpStatus.OK)
+  async removeMul(@GetUser() user: User, @Param("ids") ids: string) {
+    await this.playlistService.removeMulPlaylist(ids);
+    return "SUCCESS";
   }
 
   // 添加歌曲到歌单
@@ -46,12 +55,18 @@ export class PlaylistController {
     return "Remove Success";
   }
 
-  // 
   @UseGuards(JwtAuthGuard)
   @Get('findAllByUser')
   @HttpCode(HttpStatus.OK)
   async findAllByUserId(@GetUser() user: User) {
     return this.playlistService.findAllById(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("findById/:id")
+  @HttpCode(HttpStatus.OK)
+  async findById(@Param("id") id) {
+    return this.playlistService.findById(id);
   }
 
 }
