@@ -27,7 +27,7 @@ export class PlayList {
   totalCount: number;
 
   // 歌单简介
-  @Column({ default: "什么都没有" })
+  @Column()
   info: string;
 
   @ManyToOne(() => User, (user) => user.playList)

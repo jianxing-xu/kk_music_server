@@ -23,7 +23,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter()); // 异常情况下，响应值统一
   app.useGlobalPipes(new ValidationPipe({ disableErrorMessages: false, whitelist: true }));
 
-  await app.listen(4000);
+  await app.listen(8980);
 }
 
 bootstrap();
